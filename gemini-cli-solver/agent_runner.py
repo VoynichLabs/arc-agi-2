@@ -233,6 +233,7 @@ def prepare_workspace(
     agent_id: str,
     raw_task: dict,
     test_index: int,
+    seed: int = 0,
 ) -> Path:
     """Create workspace at /workspace with task.json, GEMINI.md, and settings.
 
@@ -244,8 +245,15 @@ def prepare_workspace(
     gemini_dir.mkdir(parents=True, exist_ok=True)
 
     # task.json: train + single test input (no output/answer)
+    # Shuffle training examples per agent so each sees a different order
+    import random
+    train = list(raw_task["train"])
+    if len(train) > 1 and seed > 0:
+        rng = random.Random(seed)
+        rng.shuffle(train)
+
     public_task = {
-        "train": raw_task["train"],
+        "train": train,
         "test": [{"input": raw_task["test"][test_index]["input"]}],
     }
     (ws / "task.json").write_text(json.dumps(public_task, indent=2))
@@ -374,7 +382,12 @@ def run_agent(config: dict) -> dict:
         emit_status({"agent_id": agent_id, "task_id": task_id, **event})
 
     try:
-        ws = prepare_workspace(agent_id, raw_task, test_index)
+        # Extract ensemble index from agent_id (e.g. "taskid_ens5_t0" -> 5)
+        import re
+        ens_match = re.search(r'_ens(\d+)_', agent_id)
+        seed = int(ens_match.group(1)) if ens_match else 0
+
+        ws = prepare_workspace(agent_id, raw_task, test_index, seed=seed)
 
         _status({"event": "started", "model": model})
 
