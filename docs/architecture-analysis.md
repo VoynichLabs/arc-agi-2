@@ -270,7 +270,7 @@ They're actively checking whether their LLM tried to steal its own API key. This
 
 3. **Adaptive agent budget.** Use a cheap first pass (1 agent, 3 iterations). If it solves the task, done. If not, escalate to more agents/iterations. Only hard tasks pay full price.
 
-4. **LODA as prior knowledge.** The agent currently has no domain knowledge beyond what's in GEMINI.md. LODA's ~6000 integer sequence programs are a corpus of transformation primitives. Could be injected as a retrieval tool: "Here are 10 LODA programs that produce similar output patterns — consider these as building blocks."
+4. **LODA as prior knowledge.** The agent currently has no domain knowledge beyond what's in GEMINI.md. LODA's 150,420 programs are a corpus of transformation primitives. Could be injected as a retrieval tool: "Here are 10 LODA programs that produce similar output patterns — consider these as building blocks."
 
 5. **Simpler sandbox.** For non-secret environments, subprocess isolation is enough. No E2B required. The key E2B feature we'd need to replicate is: agent subprocess cannot read parent environment variables (no `os.environ` leakage). Python `subprocess.Popen(env={...})` with a clean minimal env solves this for free.
 
